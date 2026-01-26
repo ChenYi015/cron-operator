@@ -126,10 +126,59 @@ tests:
           cpu: 500m
           memory: 1Gi
 
-- it: Should set nodeSelector, affinity and tolerations
+- it: Should set node selector if `global.nodeSelector` is set
+  set:
+    global:
+      nodeSelector:
+        key1: value1
+        key2: value2
+  asserts:
+  - equal:
+      path: spec.template.spec.nodeSelector.key1
+      value: value1
+  - equal:
+      path: spec.template.spec.nodeSelector.key2
+      value: value2
+
+- it: Should set node selector if `nodeSelector` is set
   set:
     nodeSelector:
-      disktype: ssd
+      key1: value1
+      key2: value2
+  asserts:
+  - equal:
+      path: spec.template.spec.nodeSelector.key1
+      value: value1
+  - equal:
+      path: spec.template.spec.nodeSelector.key2
+      value: value2
+
+- it: Should set node selector if both `global.nodeSelector` and `nodeSelector` are set
+  set:
+    global:
+      nodeSelector:
+        key1: value1
+        key2: value2
+    nodeSelector:
+      key2: value2-override
+      key3: value3
+      key4: value4
+  asserts:
+  - equal:
+      path: spec.template.spec.nodeSelector.key1
+      value: value1
+  - equal:
+      path: spec.template.spec.nodeSelector.key2
+      value: value2-override
+  - equal:
+      path: spec.template.spec.nodeSelector.key3
+      value: value3
+  - equal:
+      path: spec.template.spec.nodeSelector.key4
+      value: value4
+
+- it: Should set affinity if `affinity` is set
+  set:
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -140,15 +189,7 @@ tests:
               values:
               - cron-operator
           topologyKey: kubernetes.io/hostname
-    tolerations:
-    - key: example-key
-      operator: Exists
-      effect: "NoSchedule"
   asserts:
-  - equal:
-      path: spec.template.spec.nodeSelector
-      value:
-        disktype: ssd
   - equal:
       path: spec.template.spec.affinity
       value:
@@ -161,10 +202,102 @@ tests:
                 values:
                 - cron-operator
             topologyKey: kubernetes.io/hostname
-  - equal:
+
+- it: Should set tolerations if `global.tolerations` is set
+  set:
+    global:
+      tolerations:
+      - key: key
+        operator: Exists
+        effect: NoSchedule
+  asserts:
+  - contains:
       path: spec.template.spec.tolerations
-      value:
-      - key: example-key
+      content:
+        key: key
+        operator: Exists
+        effect: NoSchedule
+
+- it: Should set tolerations if `tolerations` is set
+  set:
+    tolerations:
+    - key: key
+      operator: Exists
+      effect: NoSchedule
+  asserts:
+  - contains:
+      path: spec.template.spec.tolerations
+      content:
+        key: key
+        operator: Exists
+        effect: NoSchedule
+
+- it: Should set tolerations if both `global.tolerations` and `tolerations` are set
+  set:
+    global:
+      tolerations:
+      - key: key1
+        operator: Exists
+        effect: NoSchedule
+    tolerations:
+    - key: key2
+      operator: Exists
+      effect: NoSchedule
+  asserts:
+  - contains:
+      path: spec.template.spec.tolerations
+      content:
+        key: key1
+        operator: Exists
+        effect: NoSchedule
+  - contains:
+      path: spec.template.spec.tolerations
+      content:
+        key: key2
+        operator: Exists
+        effect: NoSchedule
+
+- it: Should tolerate non edge node if `global.clusterProfile` is set to `Edge`
+  set:
+    global:
+      clusterProfile: Edge
+  asserts:
+  - contains:
+      path: spec.template.spec.tolerations
+      content:
+        key: node-role.alibabacloud.com/addon
+        operator: Exists
+        effect: NoSchedule
+
+- it: Should tolerate non edge node if `global.clusterProfile` is set to `Edge`
+  set:
+    global:
+      clusterProfile: Edge
+      tolerations:
+      - key: key1
+        operator: Exists
+        effect: NoSchedule
+    tolerations:
+    - key: key2
+      operator: Exists
+      effect: NoSchedule
+  asserts:
+  - contains:
+      path: spec.template.spec.tolerations
+      content:
+        key: key1
+        operator: Exists
+        effect: NoSchedule
+  - contains:
+      path: spec.template.spec.tolerations
+      content:
+        key: key2
+        operator: Exists
+        effect: NoSchedule
+  - contains:
+      path: spec.template.spec.tolerations
+      content:
+        key: node-role.alibabacloud.com/addon
         operator: Exists
         effect: NoSchedule
 

@@ -18,6 +18,15 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# Global configurations.
+global:
+  # -- ACK cluster profile.
+  clusterProfile: Default
+  # -- Global pod node selector.
+  nodeSelector: {}
+  # -- Global pod tolerations.
+  tolerations: []
+
 # -- String to partially override release name.
 nameOverride: ""
 
