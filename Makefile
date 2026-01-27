@@ -23,6 +23,8 @@ CRON_OPERATOR_CHART ?= charts/cron-operator
 RELEASE_NAME ?= cron-operator
 # Helm release namespace.
 RELEASE_NAMESPACE ?= cron-operator
+# Helm release values file.
+VALUES ?= $(CRON_OPERATOR_CHART)/values.yaml
 
 # Kind cluster name.
 KIND_CLUSTER_NAME ?= cron-operator-e2e-test
@@ -168,6 +170,7 @@ helm-upgrade: helm ## Upgrade cron-operator helm chart release (install if not e
 	    --namespace $(RELEASE_NAMESPACE) \
 	    --create-namespace \
 	    --wait \
+	    --values $(VALUES) \
 	    --set image.registry=$(IMAGE_REGISTRY) \
 	    --set image.repository=$(IMAGE_REPOSITORY) \
 	    --set image.tag=$(IMAGE_TAG)
