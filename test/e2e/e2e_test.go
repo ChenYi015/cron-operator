@@ -75,8 +75,10 @@ var _ = Describe("Manager", Ordered, func() {
 
 		By("Installing cron-operator via Helm")
 		cmd = exec.Command("make", "helm-upgrade",
+			fmt.Sprintf("IMAGE_TAG=%s", imageTag),
 			fmt.Sprintf("RELEASE_NAME=%s", name),
 			fmt.Sprintf("RELEASE_NAMESPACE=%s", namespace),
+			fmt.Sprintf("VALUES=%s", filepath.Join("charts", "cron-operator", "ci", "values.yaml")),
 		)
 		_, err = utils.Run(cmd)
 		Expect(err).NotTo(HaveOccurred(), "Failed to deploy the controller-manager via helm")

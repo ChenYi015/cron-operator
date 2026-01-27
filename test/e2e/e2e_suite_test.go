@@ -39,6 +39,8 @@ var (
 	skipCertManagerInstall = os.Getenv("CERT_MANAGER_INSTALL_SKIP") == "true"
 	// isCertManagerAlreadyInstalled will be set true when CertManager CRDs be found on the cluster
 	isCertManagerAlreadyInstalled = false
+
+	imageTag = "latest"
 )
 
 // TestE2E runs the end-to-end (e2e) test suite for the project. These tests execute in an isolated,
@@ -53,14 +55,14 @@ func TestE2E(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	By("building the manager(Operator) image")
-	cmd := exec.Command("make", "docker-build")
+	cmd := exec.Command("make", "docker-build", fmt.Sprintf("IMAGE_TAG=%s", imageTag))
 	_, err := utils.Run(cmd)
 	ExpectWithOffset(1, err).NotTo(HaveOccurred(), "Failed to build the manager(Operator) image")
 
 	// TODO(user): If you want to change the e2e test vendor from Kind, ensure the image is
 	// built and available before running the tests. Also, remove the following block.
 	By("loading the manager(Operator) image on Kind")
-	cmd = exec.Command("make", "kind-load-image")
+	cmd = exec.Command("make", "kind-load-image", fmt.Sprintf("IMAGE_TAG=%s", imageTag))
 	_, err = utils.Run(cmd)
 	ExpectWithOffset(1, err).NotTo(HaveOccurred(), "Failed to load the manager(Operator) image into Kind")
 
